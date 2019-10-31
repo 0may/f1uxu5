@@ -35,5 +35,7 @@ f1uxu5 features control over "exposure" as well as some effects. It also has a w
 ## Dependencies
 
 [openframeworks 0.10.0 or 0.10.1](https://openframeworks.cc/)
+
 [ofxLibwebsockets addon](https://github.com/robotconscience/ofxLibwebsockets)
+
 [ofxOMXCamera addon for Raspberry Pi](https://github.com/jvcleave/ofxOMXCamera)
