@@ -4,11 +4,11 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <meta name="description" content="fLUXus - Live lightpainting app">
-        <meta name="keywords" content="fLUXus, Lightpainting">
+        <meta name="description" content="f1uxu5 - Live lightpainting app">
+        <meta name="keywords" content="f1uxu5, Lightpainting">
         <meta name="author" content="Oliver Mayer">
 
-        <!--link rel="icon" href="media/button.png"-->
+        <link rel="icon" href="favicon.ico">
         <link rel="stylesheet" type="text/css" href="css/main.css">
 
         <title>f1uxu5 !nterface</title>
@@ -20,19 +20,19 @@
 
         <div class="slidecontainer">
             alpha=<span id="v-alpha" class="highlight">0.95</span>
-            <!--span style="float:right;" id="r-alpha">reset</span-->
+            <button type="button" style="float:right;" id="r-alpha">reset</button>
             <input type="range" min="900" max="1000" value="950" class="slider" id="alpha">
 
             offsetX=<span id="v-offX" class="highlight">0.0</span>
-            <!--span style="float:right;" id="r-offX">reset</span-->
+            <button type="button" style="float:right;" id="r-offX">reset</button>
             <input type="range" min="-100" max="100" value="0" class="slider" id="offX">
 
             offsetY=<span id="v-offY" class="highlight">0.0</span>
-            <!--span style="float:right;" id="r-offY">reset</span-->
+            <button type="button" style="float:right;" id="r-offY">reset</button>
             <input type="range" min="-100" max="100" value="0" class="slider" id="offY">
 
             rep3titions=<span id="v-reps" class="highlight">1</span>
-            <!--span style="float:right;" id="r-reps">reset</span-->
+            <button type="button" style="float:right;" id="r-reps">reset</button>
             <input type="range" min="1" max="21" value="1" class="slider" id="reps">
 
             <div class="centered">
@@ -48,6 +48,10 @@
                   <span class="toggle round"></span>
                 </label>
             </div>
+        </div>
+
+        <div class="me">
+        <a href="https://www.oliver-mayer.com" target="_blank">www.oliver-mayer.com</a>
         </div>
 
         <script src="js/fluxus.js"></script>

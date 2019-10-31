@@ -8,6 +8,11 @@ window.onload = function() {
     document.getElementById("flipH").oninput = onInputFlipH;
     document.getElementById("flipV").oninput = onInputFlipV;
 
+    document.getElementById("r-alpha").onclick = onResetAlpha;
+    document.getElementById("r-offX").onclick = onResetOffX;
+    document.getElementById("r-offY").onclick = onResetOffY;
+    document.getElementById("r-reps").onclick = onResetReps;
+
     websock = new WebSocket("ws://" + location.hostname + ":9092");
 
  //   websock.onopen = function (event) {
@@ -23,12 +28,24 @@ function onInputAlpha() {
     websock.send("aa:" + a);
 }
 
+function onResetAlpha() {
+    document.getElementById("alpha").value = 950;
+    onInputAlpha();
+}
+
+
 function onInputOffX() {
     let a = document.getElementById("offX").value/100.0;
     document.getElementById("v-offX").innerHTML = "" + a;
 
     websock.send("ox:" + a);
 }
+
+function onResetOffX() {
+    document.getElementById("offX").value = 0;
+    onInputOffX();
+}
+
 
 function onInputOffY() {
     let a = document.getElementById("offY").value/100.0;
@@ -37,12 +54,24 @@ function onInputOffY() {
     websock.send("oy:" + a);
 }
 
+function onResetOffY() {
+    document.getElementById("offY").value = 0;
+    onInputOffY();
+}
+
+
 function onInputReps() {
     let a = document.getElementById("reps").value;
     document.getElementById("v-reps").innerHTML = "" + a;
 
     websock.send("rp:" + a);
 }
+
+function onResetReps() {
+    document.getElementById("reps").value = 1;
+    onInputReps();
+}
+
 
 function onInputFlipH() {
     
@@ -63,4 +92,5 @@ function onInputFlipV() {
         websock.send("fv:0");
     }
 }
+
 
