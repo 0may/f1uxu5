@@ -4,9 +4,14 @@
 #include "ofxGui.h"
 #include "ofxLibwebsockets.h"
 
+#ifdef __arm__
+#include "ofxOMXVideoGrabber.h"
+#endif
+
 class ofApp : public ofBaseApp{
 
 	public:
+		ofApp(int w, int h);
 		void setup();
 		void update();
 		void draw();
@@ -40,12 +45,18 @@ class ofApp : public ofBaseApp{
 		void setupGUI(bool show = true);
 		void setupWebsocket();
 
-
+		void updateDisplayOffsets();
 
 
 
 	protected:
+
+#ifdef __arm__
+		ofxOMXVideoGrabber vidGrabber;
+		ofxOMXCameraSettings camSettings;
+#else
 		ofVideoGrabber vidGrabber;
+#endif
 
 		ofShader shader;
 
@@ -59,7 +70,6 @@ class ofApp : public ofBaseApp{
 
 		ofxLibwebsockets::Server websock;
 
-
 		bool showGui;
 		ofxPanel gui;
 		ofParameter<bool> vFlip;
@@ -69,6 +79,6 @@ class ofApp : public ofBaseApp{
 		ofParameter<float> offsetY;
 		ofParameter<int> repetitions;
 
-
-		
+		int displayOffsetX;
+		int displayOffsetY;
 };

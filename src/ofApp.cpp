@@ -1,45 +1,62 @@
 #include "ofApp.h"
 
+ofApp::ofApp(int w, int h) {
+	camWidth = w;
+	camHeight = h;
+}
+
+
+
 //--------------------------------------------------------------
 void ofApp::setup() {
 	ofSetWindowTitle("f1uxu5");
+	ofHideCursor();
 
-	camWidth = ofGetWidth();
-	camHeight = ofGetHeight();
-
+	cout << "* Trying to setup camera with size " << camWidth << "x" << camHeight << endl;
 	setupCamera();
+	cout << "* Initializing graphics elements" << endl;
 	setupGFX();
+	cout << "* Initializing GUI" << endl;
 	setupGUI(false);
+	cout << "* Initializing Websockets" << endl;
 	setupWebsocket();
+
+	updateDisplayOffsets();
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
-	ofBackground(100, 100, 100);
+	ofBackground(0);
+#ifndef __arm__
 	vidGrabber.update();
+#endif
+
 }
 
 
 
 void ofApp::draw() {
-	
+	if (displayOffsetX < 0) {
+		updateDisplayOffsets();
+	}
+
 	drawOffset();
 
 	if (!hFlip && !vFlip)
-		fboDisp->draw(0, 0, ofGetWidth(), ofGetHeight());
+		fboDisp->draw(displayOffsetX, displayOffsetY, ofGetWidth()-2*displayOffsetX, ofGetHeight()-2*displayOffsetY);
 	else if (hFlip && !vFlip)
-		fboDisp->draw(ofGetWidth() - 1, 0, -ofGetWidth(), ofGetHeight());
+		fboDisp->draw(ofGetWidth()-displayOffsetX, displayOffsetY, -ofGetWidth()+2*displayOffsetX, ofGetHeight()-2*displayOffsetY);
 	else if (!hFlip && vFlip)
-		fboDisp->draw(0, ofGetHeight()-1, ofGetWidth(), -ofGetHeight());
+		fboDisp->draw(displayOffsetX, ofGetHeight()-displayOffsetY, ofGetWidth()-2*displayOffsetX, -ofGetHeight()+2*displayOffsetY);
 	else
-		fboDisp->draw(ofGetWidth() - 1, ofGetHeight()-1, -ofGetWidth(), -ofGetHeight());
-
+		fboDisp->draw(ofGetWidth()-displayOffsetX, ofGetHeight()-displayOffsetY, -ofGetWidth()+2*displayOffsetX, -ofGetHeight()+2*displayOffsetY);
 
 	if (showGui) {
 		gui.draw();
+
 		char strFps[32];
 		sprintf(strFps, "FPS: %f", ofGetFrameRate());
-		ofDrawBitmapString(strFps, 20, ofGetHeight() - 20);
+		ofDrawBitmapString(ofGetFrameRate(), 20, ofGetHeight() - 20);
 	}
 }
 
@@ -51,7 +68,6 @@ void ofApp::drawOffset() {
 	float oX, oY, offX, offY;
 	float a;
 	ofFbo* fboTmp;
-
 
 	ofSetColor(255);
 
@@ -69,20 +85,28 @@ void ofApp::drawOffset() {
 	fboOut->begin();
 
 		ofClear(0, 255);
-		vidGrabber.getTextureReference().bind();
+
+//		vidGrabber.getTextureReference().bind();
 
 		shader.begin();
 
+			shader.setUniform2f("resolution", glm::vec2(camWidth, camHeight));
+
 			shader.setUniform1f("alpha", alpha);
 			shader.setUniform2f("offset", glm::vec2(oX*camWidth*0.15, oY*camHeight*0.15));
-			shader.setUniform2f("size", glm::vec2(camWidth, camHeight));
-			shader.setUniformTexture("texFbo", fboDisp->getTextureReference(), 1);
 
+			shader.setUniformTexture("tex0", vidGrabber.getTextureReference(), vidGrabber.getTextureID());
+			shader.setUniformTexture("texFbo", fboDisp->getTextureReference(), vidGrabber.getTextureID()+1);
+
+#ifdef __arm__
+			vidGrabber.draw(0, 0, camWidth, camHeight);
+#else
 			ofDrawRectangle(0, 0, camWidth, camHeight);
-
+#endif
 		shader.end();
 
-		vidGrabber.getTextureReference().unbind();
+//		vidGrabber.getTextureReference().unbind();
+
 
 	fboOut->end();
 
@@ -99,40 +123,53 @@ void ofApp::drawOffset() {
 		fboBuf1->begin();
 
 			ofClear(0, 255);
-			vidGrabber.getTextureReference().bind();
+		//	vidGrabber.getTextureReference().bind();
 
 			shader.begin();
 
+				shader.setUniform2f("resolution", glm::vec2(camWidth, camHeight));
+
 				shader.setUniform1f("alpha", alpha);
 				shader.setUniform2f("offset", glm::vec2(offX*camWidth*0.15, offY*camHeight*0.15));
-				shader.setUniform2f("size", glm::vec2(camWidth, camHeight));
-				shader.setUniformTexture("texFbo", fboDisp->getTextureReference(), 1);
 
+				shader.setUniformTexture("tex0", vidGrabber.getTextureReference(), vidGrabber.getTextureID());
+				shader.setUniformTexture("texFbo", fboDisp->getTextureReference(), vidGrabber.getTextureID()+1);
+
+#ifdef __arm__
+				vidGrabber.draw(0, 0, camWidth, camHeight);
+#else
 				ofDrawRectangle(0, 0, camWidth, camHeight);
-
+#endif
 			shader.end();
 
-			vidGrabber.getTextureReference().unbind();
+		//	vidGrabber.getTextureReference().unbind();
 
 		fboBuf1->end();
+
 
 		fboBuf2->begin();
 
 			ofClear(0, 255);
-			fboBuf1->getTextureReference().bind();
+		//	fboBuf1->getTextureReference().bind();
 
 			shader.begin();
 
+				shader.setUniform2f("resolution", glm::vec2(camWidth, camHeight));
+
 				shader.setUniform1f("alpha", 1.0);
 				shader.setUniform2f("offset", glm::vec2(0, 0));
-				shader.setUniform2f("size", glm::vec2(camWidth, camHeight));
+
+				shader.setUniformTexture("tex0", fboBuf1->getTextureReference(), 0);
 				shader.setUniformTexture("texFbo", fboOut->getTextureReference(), 1);
 
+#ifdef __arm__
+				fboBuf1->draw(0, 0, camWidth, camHeight);
+#else
 				ofDrawRectangle(0, 0, camWidth, camHeight);
-
+#endif
 			shader.end();
 
-			fboBuf1->getTextureReference().unbind();
+		//	fboBuf1->getTextureReference().unbind();
 
 		fboBuf2->end();
 
@@ -152,6 +189,13 @@ void ofApp::drawOffset() {
 
 void ofApp::setupCamera() {
 
+#ifdef __arm__
+	camSettings.sensorWidth = camWidth;
+	camSettings.sensorHeight = camHeight;
+	camSettings.framerate = 30;
+	camSettings.enableTexture = true;
+	vidGrabber.setup(camSettings);
+#else
 	//get back a list of devices.
 	vector<ofVideoDevice> devices = vidGrabber.listDevices();
 
@@ -167,12 +211,14 @@ void ofApp::setupCamera() {
 	}
 
 	vidGrabber.setDeviceID(0);
-	vidGrabber.setDesiredFrameRate(60);
+	vidGrabber.setDesiredFrameRate(30);
 	vidGrabber.initGrabber(camWidth, camHeight);
+#endif
+
 	camHeight = vidGrabber.getHeight();
 	camWidth = vidGrabber.getWidth();
 
-	cout << "Cam resolution: " << camWidth << "x" << camHeight << endl;
+	cout << "** Camera resolution is: " << camWidth << "x" << camHeight << endl;
 
 }
 
@@ -203,7 +249,7 @@ void ofApp::setupGFX() {
 	fboBuf2->end();
 
 
-	cout << "Loading shader... " << (shader.load("shader.vert", "shader.frag") ? "SUCCESS" : "FAILED") << endl;
+	cout << "** Loading shader... " << (shader.load("shader.vert", "shader.frag") ? "SUCCESS" : "FAILED") << endl;
 
 	ofSetVerticalSync(true);
 
@@ -242,7 +288,6 @@ void ofApp::setupGUI(bool show) {
 	offsetY.setName("offset y");
 	gui.add(offsetY);
 
-
 	repetitions.set(1);
 	repetitions.setMin(1);
 	repetitions.setMax(21);
@@ -259,11 +304,32 @@ void ofApp::setupWebsocket() {
 	options.port = 9092;
 	options.bUseSSL = false; 
 
-
-	cout << "Websocket setup... " << (websock.setup(options) ? "SUCCESS" : "FAILED") << endl;
+	cout << "** Websocket setup... " << (websock.setup(options) ? "SUCCESS" : "FAILED") << endl;
 
 	websock.addListener(this);
-	
+}
+
+
+void ofApp::updateDisplayOffsets() {
+
+	int w = ofGetWidth();
+	int h = ofGetHeight();
+
+	float aspectDisp = w/(float)h;
+	float aspectCam = camWidth/(float)camHeight;
+
+	if (aspectDisp == aspectCam) {
+		displayOffsetX = 0;
+		displayOffsetY = 0;
+	}
+	else if (aspectDisp > aspectCam) {
+		displayOffsetY = 0;
+		displayOffsetX = (int)((w - h*aspectCam)*0.5 + 0.5);
+	}
+	else {
+		displayOffsetX = 0;
+		displayOffsetY = (int)((h - w/aspectCam)*0.5 + 0.5);
+	}
 }
 
 
@@ -300,12 +366,18 @@ void ofApp::onBroadcast(ofxLibwebsockets::Event& args) {}
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+#ifndef __arm__
 	if (key == 's' || key == 'S') {
 		vidGrabber.videoSettings();
 	}
+#endif
 
 	if (key == 'u' || key == 'U') {
 		showGui = !showGui;
+		if (showGui)
+			ofShowCursor();
+		else
+			ofHideCursor();
 	}
 
 	if (key == 'v' || key == 'V') {
@@ -318,6 +390,8 @@ void ofApp::keyPressed(int key){
 
 	if (key == 'f' || key == 'F') {
 		ofToggleFullscreen();
+
+		displayOffsetX = -1;
 	}
 }
 

@@ -1,35 +1,42 @@
-// fragment shader
+precision mediump float;
 
-#version 150
+//we passed this in from our vert shader
+varying vec2        texcoord0;
 
-uniform float alpha;
-uniform vec2 offset;
-uniform vec2 size;
-uniform sampler2DRect tex0;
-uniform sampler2DRect texFbo;
+uniform sampler2D   tex0;
+uniform sampler2D   texFbo;
 
-out vec4 outputColor;
+uniform vec2        resolution;
+
+uniform float       alpha;
+uniform vec2        offset;
+
 
 float intensity(vec4 c) {
 	return 0.299*c.r + 0.587*c.g + 0.114*c.b;
 }
 
+
 void main()
 {
-	vec2 stFbo = vec2((gl_FragCoord.x - offset.x), (gl_FragCoord.y - offset.y));
 
-	vec4 cFbo = vec4(0.0, 0.0, 0.0, 1.0);
-	
-	if (stFbo.x >= 0 && stFbo.x < size.x && stFbo.y >= 0 && stFbo.y < size.y) {
-		cFbo = vec4( texture(texFbo, stFbo).rgb * alpha, 1.0);
+//	vec2 stFbo = vec2((texcoord0.x - offset.x/resolution.x), (texcoord0.y - offset.y/resolution.y));
+//	vec4 cFbo = vec4(0.0, 0.0, 0.0, 1.0);
+//
+//	if (stFbo.x >= 0.0 && stFbo.x < resolution.x && stFbo.y >= 0.0 && stFbo.y < resolution.y) {
+//		cFbo = vec4( texture2D(texFbo, stFbo.st).rgb * alpha, 1.0);
+//	}
+
+	vec4 cCam = texture2D(tex0, texcoord0.st);
+	vec4 cFbo = vec4( texture2D(texFbo, vec2((texcoord0.x-offset.x/resolution.x), (texcoord0.y-offset.y/resolution.y))).rgb * alpha, 1.0);
+
+
+	if (intensity(cCam) > intensity(cFbo)) {
+		gl_FragColor = cCam;
 	}
-
-	vec4 cCam = texture(tex0, gl_FragCoord.xy);
-
-	if (intensity(cCam) > intensity(cFbo))
-		outputColor = cCam;
-	else
-		outputColor = cFbo;
+	else {
+		gl_FragColor = cFbo;
+	}
 }
 
 
