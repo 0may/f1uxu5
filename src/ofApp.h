@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "ofxLibwebsockets.h"
+#include "ofxXmlSettings.h"
 
 #ifdef __arm__
 #include "ofxOMXVideoGrabber.h"
@@ -11,7 +12,7 @@
 class ofApp : public ofBaseApp{
 
 	public:
-		ofApp(int w, int h);
+		ofApp(ofxXmlSettings& settings);
 		void setup();
 		void update();
 		void draw();
@@ -57,6 +58,8 @@ class ofApp : public ofBaseApp{
 #else
 		ofVideoGrabber vidGrabber;
 #endif
+
+		ofxXmlSettings settings;
 
 		ofShader shader;
 

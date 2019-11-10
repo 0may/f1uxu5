@@ -1,0 +1,18 @@
+<f1uxu5>
+	<camWidth>1280</camWidth>
+	<camHeight>720</camHeight>
+	<meteringType>Backlit</meteringType>
+	<whiteBalance>Off</whiteBalance>
+	<exposurePreset>FixedFps</exposurePreset>
+	<iso>100</iso>
+	<shutterSpeed>100</shutterSpeed>
+	<websocketsPort>9092</websocketsPort>
+	<vertexShader>shader.vert</vertexShader>
+	<fragmentShader>shader.frag</fragmentShader>
+	<alpha>0.95</alpha>
+	<offsetX>0.0</offsetX>
+	<offsetY>0.0</offsetY>
+	<repetitions>1</repetitions>
+	<flipH>1</flipH>
+	<flipV>0</flipV>
+</f1uxu5>

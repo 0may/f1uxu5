@@ -1,8 +1,9 @@
 #include "ofApp.h"
 
-ofApp::ofApp(int w, int h) {
-	camWidth = w;
-	camHeight = h;
+ofApp::ofApp(ofxXmlSettings& settings) {
+	this->settings = settings;
+	camWidth = settings.getValue("f1uxu5:camWidth", 640);
+	camHeight = settings.getValue("f1uxu5:camHeight", 480);
 }
 
 
@@ -189,12 +190,43 @@ void ofApp::drawOffset() {
 
 void ofApp::setupCamera() {
 
+	cout << "** Camera white balance names: " << endl;
+	vector<string> names = OMX_Maps::getInstance().getWhiteBalanceNames();
+	for (int i = 0; i < names.size(); i++) {
+		cout << names[i] << " ";
+	}
+	cout << endl;
+
+	cout << "** Camera metering names: " << endl;
+	names = OMX_Maps::getInstance().meteringNames;
+	for (int i = 0; i < names.size(); i++) {
+		cout << names[i] << " ";
+	}
+	cout << endl;
+
+	cout << "** Camera exposure preset names: " << endl;
+	names = OMX_Maps::getInstance().getExposurePresetNames();
+	for (int i = 0; i < names.size(); i++) {
+		cout << names[i] << " ";
+	}
+	cout << endl;
+
+
+
+
 #ifdef __arm__
 	camSettings.sensorWidth = camWidth;
 	camSettings.sensorHeight = camHeight;
 	camSettings.framerate = 30;
 	camSettings.enableTexture = true;
 	vidGrabber.setup(camSettings);
+	vidGrabber.setWhiteBalance(settings.getValue("f1uxu5:whiteBalance", "Fluorescent"));
+	vidGrabber.setExposurePreset(settings.getValue("f1uxu5:exposurePreset", "Night"));
+	vidGrabber.setMeteringType(settings.getValue("f1uxu5:meteringType", "Average"));
+	vidGrabber.setAutoISO(false);
+	vidGrabber.setISO(settings.getValue("f1uxu5:iso", 800));
+	vidGrabber.setAutoShutter(false);
+	vidGrabber.setShutterSpeed(settings.getValue("f1uxu5:shutterSpeed", 100));
 #else
 	//get back a list of devices.
 	vector<ofVideoDevice> devices = vidGrabber.listDevices();
@@ -249,7 +281,9 @@ void ofApp::setupGFX() {
 	fboBuf2->end();
 
 
-	cout << "** Loading shader... " << (shader.load("shader.vert", "shader.frag") ? "SUCCESS" : "FAILED") << endl;
+	cout << "** Loading shader... " 
+	     << (shader.load(settings.getValue("f1uxu5:vertexShader", "shader.vert"), settings.getValue("f1uxu5:fragmentShader", "shader.frag")) ? "SUCCESS" : "FAILED") 
+             << endl;
 
 	ofSetVerticalSync(true);
 
@@ -262,33 +296,33 @@ void ofApp::setupGFX() {
 void ofApp::setupGUI(bool show) {
 	gui.setup();
 
-	vFlip.set(false);
+	vFlip.set(settings.getValue("f1uxu5:flipV", 0) != 0);
 	vFlip.setName("vertical flip");
 	gui.add(vFlip);
 
-	hFlip.set(true);
-	hFlip.setName("horizonatl flip");
+	hFlip.set(settings.getValue("f1uxu5:flipH", 1) != 0);
+	hFlip.setName("horizontal flip");
 	gui.add(hFlip);
 
-	alpha.set(0.95);
+	alpha.set(settings.getValue("f1uxu5:alpha", 0.95));
 	alpha.setMin(0.9);
 	alpha.setMax(1.0);
 	alpha.setName("alpha");
 	gui.add(alpha);
 
-	offsetX.set(0.0);
+	offsetX.set(settings.getValue("f1uxu5:offsetX", 0.0));
 	offsetX.setMin(-1.0);
 	offsetX.setMax(1.0);
 	offsetX.setName("offset x");
 	gui.add(offsetX);
 
-	offsetY.set(0.0);
+	offsetY.set(settings.getValue("f1uxu5:offsetY", 0.0));
 	offsetY.setMin(-1.0);
 	offsetY.setMax(1.0);
 	offsetY.setName("offset y");
 	gui.add(offsetY);
 
-	repetitions.set(1);
+	repetitions.set(settings.getValue("f1uxu5:repetitions", 1));
 	repetitions.setMin(1);
 	repetitions.setMax(21);
 	repetitions.setName("repetitions");
@@ -301,7 +335,7 @@ void ofApp::setupGUI(bool show) {
 void ofApp::setupWebsocket() {
 
 	ofxLibwebsockets::ServerOptions options = ofxLibwebsockets::defaultServerOptions();
-	options.port = 9092;
+	options.port = settings.getValue("f1uxu5:websocketsPort", 9092);
 	options.bUseSSL = false; 
 
 	cout << "** Websocket setup... " << (websock.setup(options) ? "SUCCESS" : "FAILED") << endl;
