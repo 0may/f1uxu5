@@ -317,7 +317,7 @@ void ofApp::setupGUI(bool show) {
 	gui.add(hFlip);
 
 	alpha.set(settings.getValue("f1uxu5:alpha", 0.95));
-	alpha.setMin(0.9);
+	alpha.setMin(0.8);
 	alpha.setMax(1.0);
 	alpha.setName("alpha");
 	gui.add(alpha);
