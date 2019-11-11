@@ -2,11 +2,10 @@
 	<camDeviceID>0</camDeviceID>
 	<camWidth>1280</camWidth>
 	<camHeight>720</camHeight>
-	<meteringType>Backlit</meteringType>
-	<whiteBalance>Off</whiteBalance>
+	<meteringType>Average</meteringType>
+	<whiteBalance>Flash</whiteBalance>
 	<exposurePreset>FixedFps</exposurePreset>
 	<iso>100</iso>
-	<shutterSpeed>100</shutterSpeed>
 	<websocketsPort>9092</websocketsPort>
 	<alpha>0.95</alpha>
 	<offsetX>0.0</offsetX>

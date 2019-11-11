@@ -183,21 +183,21 @@ void ofApp::setupCamera() {
 
 #ifdef __arm__
     cout << "- Available options for RPi camera:" << endl;
-	cout << "  - White Balance names: " << endl;
+	cout << "  - White Balance names:   ";
 	vector<string> names = OMX_Maps::getInstance().getWhiteBalanceNames();
 	for (int i = 0; i < names.size(); i++) {
 		cout << names[i] << " ";
 	}
 	cout << endl;
 
-	cout << "  - Metering Type names: " << endl;
+	cout << "  - Metering Type names:   ";
 	names = OMX_Maps::getInstance().meteringNames;
 	for (int i = 0; i < names.size(); i++) {
 		cout << names[i] << " ";
 	}
 	cout << endl;
 
-	cout << "  - Exposure Preset names: " << endl;
+	cout << "  - Exposure Preset names: ";
 	names = OMX_Maps::getInstance().getExposurePresetNames();
 	for (int i = 0; i < names.size(); i++) {
 		cout << names[i] << " ";
@@ -208,20 +208,26 @@ void ofApp::setupCamera() {
 	camSettings.sensorHeight = camHeight;
 	camSettings.framerate = 30;
 	camSettings.enableTexture = true;
+	camSettings.whiteBalance = settings.getValue("f1uxu5:whiteBalance", "Flash");
+	camSettings.meteringType = settings.getValue("f1uxu5:meteringType", "Average");
+	camSettings.exposurePreset = settings.getValue("f1uxu5:exposurePreset", "FixedFps");
+	camSettings.autoShutter = true;
+	camSettings.shutterSpeed = 0;
+	camSettings.autoISO = false;
+	camSettings.ISO = settings.getValue("f1uxu5:iso", 200);
+
 	vidGrabber.setup(camSettings);
-	cout << "- Selected options for RPi camera:" << end;
-	vidGrabber.setWhiteBalance(settings.getValue("f1uxu5:whiteBalance", "Flash"));
+
+	cout << "- Waiting for camera to be ready..." << endl;
+
+	while (!vidGrabber.isReady());
+
+	cout << "- Selected options for RPi camera: " << endl;
 	cout << "  - White Balance:   " << vidGrabber.getWhiteBalance() << endl;
-	vidGrabber.setExposurePreset(settings.getValue("f1uxu5:exposurePreset", "FixedFps"));
 	cout << "  - Exposure Preset: " << vidGrabber.getExposurePreset() << endl;
-	vidGrabber.setMeteringType(settings.getValue("f1uxu5:meteringType", "Average"));
 	cout << "  - Metering Type:   " << vidGrabber.getMeteringType() << endl;
-	vidGrabber.setAutoISO(false);
-	vidGrabber.setISO(settings.getValue("f1uxu5:iso", 100));
 	cout << "  - ISO:             " << vidGrabber.getISO() << endl;
-	vidGrabber.setAutoShutter(false);
-	vidGrabber.setShutterSpeed(settings.getValue("f1uxu5:shutterSpeed", 100));
-	cout << "  - Shutter Speed:   " << vidGrabber.getShutterSpeed() << endl;
+//	cout << "  - Shutter Speed:   " << vidGrabber.getShutterSpeed() << endl;
 #else
 	cout << "- Available camera devices:" << endl;
 
