@@ -14,11 +14,6 @@ window.onload = function() {
     document.getElementById("r-reps").onclick = onResetReps;
 
     websock = new WebSocket("ws://" + location.hostname + ":9092");
-
- //   websock.onopen = function (event) {
- //       console.log('yaay'); 
- //   };
-
 }
 
 function onInputAlpha() {

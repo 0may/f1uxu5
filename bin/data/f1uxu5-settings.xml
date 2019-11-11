@@ -1,4 +1,5 @@
 <f1uxu5>
+	<camDeviceID>0</camDeviceID>
 	<camWidth>1280</camWidth>
 	<camHeight>720</camHeight>
 	<meteringType>Backlit</meteringType>
@@ -7,8 +8,6 @@
 	<iso>100</iso>
 	<shutterSpeed>100</shutterSpeed>
 	<websocketsPort>9092</websocketsPort>
-	<vertexShader>shader.vert</vertexShader>
-	<fragmentShader>shader.frag</fragmentShader>
 	<alpha>0.95</alpha>
 	<offsetX>0.0</offsetX>
 	<offsetY>0.0</offsetY>

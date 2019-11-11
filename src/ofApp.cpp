@@ -13,14 +13,11 @@ void ofApp::setup() {
 	ofSetWindowTitle("f1uxu5");
 	ofHideCursor();
 
-	cout << "* Trying to setup camera with size " << camWidth << "x" << camHeight << endl;
 	setupCamera();
-	cout << "* Initializing graphics elements" << endl;
 	setupGFX();
-	cout << "* Initializing GUI" << endl;
 	setupGUI(false);
-	cout << "* Initializing Websockets" << endl;
 	setupWebsocket();
+	cout << endl;
 
 	updateDisplayOffsets();
 }
@@ -87,8 +84,6 @@ void ofApp::drawOffset() {
 
 		ofClear(0, 255);
 
-//		vidGrabber.getTextureReference().bind();
-
 		shader.begin();
 
 			shader.setUniform2f("resolution", glm::vec2(camWidth, camHeight));
@@ -96,17 +91,16 @@ void ofApp::drawOffset() {
 			shader.setUniform1f("alpha", alpha);
 			shader.setUniform2f("offset", glm::vec2(oX*camWidth*0.15, oY*camHeight*0.15));
 
-			shader.setUniformTexture("tex0", vidGrabber.getTextureReference(), vidGrabber.getTextureID());
-			shader.setUniformTexture("texFbo", fboDisp->getTextureReference(), vidGrabber.getTextureID()+1);
-
 #ifdef __arm__
-			vidGrabber.draw(0, 0, camWidth, camHeight);
+			shader.setUniformTexture("tex0", vidGrabber.getTextureReference(), vidGrabber.getTextureID());
+			shader.setUniformTexture("texFbo", fboDisp->getTexture(), vidGrabber.getTextureID()+1);
 #else
-			ofDrawRectangle(0, 0, camWidth, camHeight);
+			shader.setUniformTexture("tex0", vidGrabber.getTexture(), 0);
+			shader.setUniformTexture("texFbo", fboDisp->getTexture(), 1);
 #endif
-		shader.end();
+			vidGrabber.draw(0, 0, camWidth, camHeight);
 
-//		vidGrabber.getTextureReference().unbind();
+		shader.end();
 
 
 	fboOut->end();
@@ -124,7 +118,6 @@ void ofApp::drawOffset() {
 		fboBuf1->begin();
 
 			ofClear(0, 255);
-		//	vidGrabber.getTextureReference().bind();
 
 			shader.begin();
 
@@ -133,25 +126,25 @@ void ofApp::drawOffset() {
 				shader.setUniform1f("alpha", alpha);
 				shader.setUniform2f("offset", glm::vec2(offX*camWidth*0.15, offY*camHeight*0.15));
 
-				shader.setUniformTexture("tex0", vidGrabber.getTextureReference(), vidGrabber.getTextureID());
-				shader.setUniformTexture("texFbo", fboDisp->getTextureReference(), vidGrabber.getTextureID()+1);
-
 #ifdef __arm__
-				vidGrabber.draw(0, 0, camWidth, camHeight);
+				shader.setUniformTexture("tex0", vidGrabber.getTextureReference(), vidGrabber.getTextureID());
+				shader.setUniformTexture("texFbo", fboDisp->getTexture(), vidGrabber.getTextureID()+1);
 #else
-				ofDrawRectangle(0, 0, camWidth, camHeight);
+				shader.setUniformTexture("tex0", vidGrabber.getTexture(), 0);
+				shader.setUniformTexture("texFbo", fboDisp->getTexture(), 1);
 #endif
+
+				vidGrabber.draw(0, 0, camWidth, camHeight);
+
 			shader.end();
 
-		//	vidGrabber.getTextureReference().unbind();
-
 		fboBuf1->end();
+
 
 
 		fboBuf2->begin();
 
 			ofClear(0, 255);
-		//	fboBuf1->getTextureReference().bind();
 
 			shader.begin();
 
@@ -160,17 +153,12 @@ void ofApp::drawOffset() {
 				shader.setUniform1f("alpha", 1.0);
 				shader.setUniform2f("offset", glm::vec2(0, 0));
 
-				shader.setUniformTexture("tex0", fboBuf1->getTextureReference(), 0);
-				shader.setUniformTexture("texFbo", fboOut->getTextureReference(), 1);
+				shader.setUniformTexture("tex0", fboBuf1->getTexture(), 0);
+				shader.setUniformTexture("texFbo", fboOut->getTexture(), 1);
 
-#ifdef __arm__
 				fboBuf1->draw(0, 0, camWidth, camHeight);
-#else
-				ofDrawRectangle(0, 0, camWidth, camHeight);
-#endif
-			shader.end();
 
-		//	fboBuf1->getTextureReference().unbind();
+			shader.end();
 
 		fboBuf2->end();
 
@@ -190,59 +178,66 @@ void ofApp::drawOffset() {
 
 void ofApp::setupCamera() {
 
-	cout << "** Camera white balance names: " << endl;
+	cout << "\nSetting up camera" << endl;
+	cout << "- Specified camera resolution: " << camWidth << "x" << camHeight << endl;
+
+#ifdef __arm__
+    cout << "- Available options for RPi camera:" << endl;
+	cout << "  - White Balance names: " << endl;
 	vector<string> names = OMX_Maps::getInstance().getWhiteBalanceNames();
 	for (int i = 0; i < names.size(); i++) {
 		cout << names[i] << " ";
 	}
 	cout << endl;
 
-	cout << "** Camera metering names: " << endl;
+	cout << "  - Metering Type names: " << endl;
 	names = OMX_Maps::getInstance().meteringNames;
 	for (int i = 0; i < names.size(); i++) {
 		cout << names[i] << " ";
 	}
 	cout << endl;
 
-	cout << "** Camera exposure preset names: " << endl;
+	cout << "  - Exposure Preset names: " << endl;
 	names = OMX_Maps::getInstance().getExposurePresetNames();
 	for (int i = 0; i < names.size(); i++) {
 		cout << names[i] << " ";
 	}
-	cout << endl;
+	cout << endl << endl;
 
-
-
-
-#ifdef __arm__
 	camSettings.sensorWidth = camWidth;
 	camSettings.sensorHeight = camHeight;
 	camSettings.framerate = 30;
 	camSettings.enableTexture = true;
 	vidGrabber.setup(camSettings);
-	vidGrabber.setWhiteBalance(settings.getValue("f1uxu5:whiteBalance", "Fluorescent"));
-	vidGrabber.setExposurePreset(settings.getValue("f1uxu5:exposurePreset", "Night"));
+	cout << "- Selected options for RPi camera:" << end;
+	vidGrabber.setWhiteBalance(settings.getValue("f1uxu5:whiteBalance", "Flash"));
+	cout << "  - White Balance:   " << vidGrabber.getWhiteBalance() << endl;
+	vidGrabber.setExposurePreset(settings.getValue("f1uxu5:exposurePreset", "FixedFps"));
+	cout << "  - Exposure Preset: " << vidGrabber.getExposurePreset() << endl;
 	vidGrabber.setMeteringType(settings.getValue("f1uxu5:meteringType", "Average"));
+	cout << "  - Metering Type:   " << vidGrabber.getMeteringType() << endl;
 	vidGrabber.setAutoISO(false);
-	vidGrabber.setISO(settings.getValue("f1uxu5:iso", 800));
+	vidGrabber.setISO(settings.getValue("f1uxu5:iso", 100));
+	cout << "  - ISO:             " << vidGrabber.getISO() << endl;
 	vidGrabber.setAutoShutter(false);
 	vidGrabber.setShutterSpeed(settings.getValue("f1uxu5:shutterSpeed", 100));
+	cout << "  - Shutter Speed:   " << vidGrabber.getShutterSpeed() << endl;
 #else
-	//get back a list of devices.
+	cout << "- Available camera devices:" << endl;
+
 	vector<ofVideoDevice> devices = vidGrabber.listDevices();
 
 	for (size_t i = 0; i < devices.size(); i++) {
 		if (devices[i].bAvailable) {
-			//log the device
-			ofLogNotice() << devices[i].id << ": " << devices[i].deviceName;
+			cout << "  - " << devices[i].id << ": " << devices[i].deviceName << endl;
 		}
 		else {
-			//log the device and note it as unavailable
-			ofLogNotice() << devices[i].id << ": " << devices[i].deviceName << " - unavailable ";
+			cout << "  - " << devices[i].id << ": " << devices[i].deviceName << " - unavailable" << endl;
 		}
 	}
 
-	vidGrabber.setDeviceID(0);
+	cout << "- Selected camera device: " << settings.getValue("f1uxu5:camDeviceID", 0) << endl;
+	vidGrabber.setDeviceID(settings.getValue("f1uxu5:camDeviceID", 0));
 	vidGrabber.setDesiredFrameRate(30);
 	vidGrabber.initGrabber(camWidth, camHeight);
 #endif
@@ -250,12 +245,15 @@ void ofApp::setupCamera() {
 	camHeight = vidGrabber.getHeight();
 	camWidth = vidGrabber.getWidth();
 
-	cout << "** Camera resolution is: " << camWidth << "x" << camHeight << endl;
+	cout << "- Final camera resolution: " << camWidth << "x" << camHeight << endl;
 
 }
 
 
 void ofApp::setupGFX() {
+
+	cout << "\nSetting up graphics elements" << endl;
+
 	fboDisp = new ofFbo();
 	fboDisp->allocate(camWidth, camHeight);
 	fboDisp->begin();
@@ -280,10 +278,15 @@ void ofApp::setupGFX() {
 	ofClear(0, 255);
 	fboBuf2->end();
 
-
-	cout << "** Loading shader... " 
-	     << (shader.load(settings.getValue("f1uxu5:vertexShader", "shader.vert"), settings.getValue("f1uxu5:fragmentShader", "shader.frag")) ? "SUCCESS" : "FAILED") 
-             << endl;
+#ifdef __arm__
+	cout << "- Loading shader: " 
+	     << (shader.load("shader.rpi.vert", "shader.rpi.frag") ? "SUCCESS" : "FAILED") 
+    	<< endl;
+#else
+	cout << "- Loading shader: " 
+	     << (shader.load("shader.i386.vert", "shader.i386.frag") ? "SUCCESS" : "FAILED") 
+    	<< endl;
+#endif
 
 	ofSetVerticalSync(true);
 
@@ -294,6 +297,9 @@ void ofApp::setupGFX() {
 
 
 void ofApp::setupGUI(bool show) {
+
+	cout << "\nSetting up GUI" << endl;
+
 	gui.setup();
 
 	vFlip.set(settings.getValue("f1uxu5:flipV", 0) != 0);
@@ -324,7 +330,7 @@ void ofApp::setupGUI(bool show) {
 
 	repetitions.set(settings.getValue("f1uxu5:repetitions", 1));
 	repetitions.setMin(1);
-	repetitions.setMax(21);
+	repetitions.setMax(15);
 	repetitions.setName("repetitions");
 	gui.add(repetitions);
 
@@ -334,11 +340,13 @@ void ofApp::setupGUI(bool show) {
 
 void ofApp::setupWebsocket() {
 
+	cout << "\nSetting up Websockets" << endl;
+
 	ofxLibwebsockets::ServerOptions options = ofxLibwebsockets::defaultServerOptions();
 	options.port = settings.getValue("f1uxu5:websocketsPort", 9092);
 	options.bUseSSL = false; 
 
-	cout << "** Websocket setup... " << (websock.setup(options) ? "SUCCESS" : "FAILED") << endl;
+	cout << "- Websocket setup at port " << options.port << ": " << (websock.setup(options) ? "SUCCESS" : "FAILED") << endl;
 
 	websock.addListener(this);
 }
