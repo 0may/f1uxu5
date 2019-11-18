@@ -34,10 +34,9 @@ f1uxu5 features control over "exposure" as well as some effects. It also has a w
 
 ## Dependencies
 
-[openframeworks 0.10.0 or 0.10.1](https://openframeworks.cc/)
-
-[ofxLibwebsockets addon](https://github.com/robotconscience/ofxLibwebsockets)
-
-[ofxOMXCamera addon for Raspberry Pi](https://github.com/jvcleave/ofxOMXCamera)
+- [openframeworks 0.10.0 or 0.10.1](https://openframeworks.cc/)
+- [ofxLibwebsockets addon](https://github.com/robotconscience/ofxLibwebsockets)
+  - ofxLibwebsockets uses [Libwebsockets v1.4](https://github.com/warmcat/libwebsockets/releases/tag/v1.4-chrome43-firefox-36). I had to compile Libwebsockets on Raspbian and Desktop Linux (Xubuntu) and replace the library file **libwebsockets.a** in **ofxLibwebsockets/libs/libwebsockets/lib/linuxarmv6l/** (Raspbian) or **ofxLibwebsockets/libs/libwebsockets/lib/linux64/** (Xubuntu) respectively due to compiler version. 
+- [ofxOMXCamera addon for Raspberry Pi](https://github.com/jvcleave/ofxOMXCamera)
 
 
