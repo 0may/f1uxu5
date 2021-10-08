@@ -7,7 +7,7 @@ f1uxu5 emulates the looks of long exposure photography for a live video feed. It
 f1uxu5 features control over "exposure" as well as some effects. It also has a web interface (websockets) to control its parameters. The **f1uxu5 !nterface** connects to f1uxu5 by a web-browser, so you can control f1uxu5 using any smarthphone.
 
 
-Works only with Raspberry Pi camera module, no USB cameras.
+**Works only with Raspberry Pi camera module, no USB cameras.**
 
 
 
